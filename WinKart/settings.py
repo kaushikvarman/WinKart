@@ -127,12 +127,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-#STATIC_ROOT = os.path.join(BASE_DIR, 'Winkart/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'WinKart/static')
 STATIC_ROOT = BASE_DIR /'static'
 STATICFILES_DIRS = [
-    'Winkart/static',
+    'WinKart/static',
 ]
+
+
 
 #media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
+
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger", #as we want to print error msgs while registering
+    50: "critical",           # we used ERROR and danger
+}
