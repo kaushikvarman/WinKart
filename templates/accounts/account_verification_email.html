@@ -1,0 +1,15 @@
+{% autoescape off %}
+
+<!-- In Django, the autoescape feature is used to automatically escape 
+special characters in templates to prevent cross-site scripting (XSS) attacks.
+By default, it is enabled in Django -->
+
+Hi {{user.first_name}},
+
+please click on below link to confirm your registration.
+
+http://{{domain}}{% url 'activate' uidb64=uid token=token %}
+
+If this is not for you, please ignore this email.
+
+{% endautoescape %}

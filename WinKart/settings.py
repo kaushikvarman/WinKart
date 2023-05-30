@@ -143,5 +143,18 @@ from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger", #as we want to print error msgs while registering
-    50: "critical",           # we used ERROR and danger
+            # we used ERROR and danger
 }
+
+#SMTP configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'kaushikvarman@gmail.com'
+EMAIL_HOST_PASSWORD = 'jwxdovzpqyfshmxb'
+EMAIL_USE_TLS = True
+#In Django, the EMAIL_USE_TLS setting is used to specify whether the email backend 
+# should use a secure TLS (Transport Layer Security) connection when communicating 
+# with the email server.
+
+
