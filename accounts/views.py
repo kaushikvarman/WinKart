@@ -11,6 +11,9 @@ from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+from cart.models import Cart,CartItem
+from cart.views import _cart_id
+import requests
 
 
 # Create your views here.
@@ -58,9 +61,69 @@ def login(request):
 
         user = auth.authenticate(email=email,password=password)
         if user is not None:
+            
+            #if user didnt loggedin and added items to cart
+            #then after logging same items must reflect in user cart
+            #this code will ensure that
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                
+                if is_cart_item_exists:
+                    
+                    cart_item = CartItem.objects.filter(cart=cart) #it will give all the items in the cart which are assigned to cart
+                    #getting product variatiomn by cart id
+                    product_variation = []
+                    for item in cart_item:
+                            variation = item.variations.all()
+                            product_variation.append(list(variation))
+                            print(product_variation)
+                            # item.user = user
+                            # item.save()
+                    #now we will get items from user to access his product variations
+                    cart_items = CartItem.objects.filter(user=user)
+                    product_variation2 = []
+                    id = []
+                    for item in cart_items:
+                        variations2 = item.variations.all()
+                        product_variation2.append(list(variations2))
+                        id.append(item.id)
+                        
+
+                    #now we intersect this two lists to find the similar items
+                    for pr in product_variation:
+                        if pr in product_variation2:
+                            index = product_variation2.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id = item_id)
+                            item.quantity += 1
+                            item.user = user
+                            item.save()
+                        else:
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            for item in cart_item:
+                                item.user = user 
+                                item.save()
+
+
+            except:
+                pass
             auth.login(request,user)
             messages.success(request,'you are now logged in.')
-            return redirect('dashboard')
+            url = request.META.get('HTTP_REFERER') #it will grab the prev url 
+                                                   #In our case it is "http://127.0.0.1:8000/accounts/login/?next=/cart/checkout/"
+            try:
+                query = requests.utils.urlparse(url).query 
+                
+                #query gives : next=/cart/checkout/
+                params = dict(x.split('=') for x in query.split())
+                #params gives : {'next': '/cart/checkout/'}
+                if 'next' in params:
+                    nextPage = params['next']
+                    return redirect(nextPage)
+                
+            except:
+                return redirect('dashboard')
         else:
             messages.error(request,'Invalid login credentials!')
             return redirect('login')
