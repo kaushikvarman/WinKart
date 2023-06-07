@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'cart',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -156,5 +157,8 @@ EMAIL_USE_TLS = True
 #In Django, the EMAIL_USE_TLS setting is used to specify whether the email backend 
 # should use a secure TLS (Transport Layer Security) connection when communicating 
 # with the email server.
+
+#for paypal popup
+SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
 
 

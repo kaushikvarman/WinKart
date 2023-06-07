@@ -1,0 +1,13 @@
+{% autoescape off %}
+
+<!-- In Django, the autoescape feature is used to automatically escape 
+special characters in templates to prevent cross-site scripting (XSS) attacks.
+By default, it is enabled in Django -->
+
+Hi {{user.first_name}},
+
+Your Order has been received
+
+Order Number: {{order.order_number}}
+
+{% endautoescape %}
