@@ -246,7 +246,7 @@
                         console.log('Success: ',data);
                         // this data(orderid,transID) we get from views 
                         console.log('Transaction Completed.');
-                        windows.location.href = redirect_url + '?order_number'+data.order_number+'&payment_id='+data.payment_id;
+                        window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
                        });
                     }
                 });

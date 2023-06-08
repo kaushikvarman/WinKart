@@ -64,6 +64,7 @@ class Account(AbstractBaseUser):
 
     objects = MyAccountManager()
 
+
     #this means that when we return the account object inside the template..this should reflect email address
     def __str__(self):
         return self.email 
@@ -73,6 +74,9 @@ class Account(AbstractBaseUser):
     
     def has_module_perms(self,add_label):
         return True 
+    
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
 
 
