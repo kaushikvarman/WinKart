@@ -47,8 +47,10 @@ def product_detail(request,category_slug, product_slug):
       
     except Exception as e:
         raise e
-    orderproduct = OrderProduct.objects.filter(user=request.user,product_id = single_product.id)
-
+    if request.user.is_authenticated:
+        orderproduct = OrderProduct.objects.filter(user=request.user,product_id = single_product.id)
+    else:
+        orderproduct = None 
     #get the reviews
     reviews = ReviewRating.objects.filter(product_id=single_product.id,status=True)
     print(len(reviews))

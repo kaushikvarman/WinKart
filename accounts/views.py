@@ -14,6 +14,7 @@ from django.core.mail import EmailMessage
 from cart.models import Cart,CartItem
 from cart.views import _cart_id
 import requests
+from orders.models import Order
 
 
 # Create your views here.
@@ -167,7 +168,12 @@ def activate(request,uidb64,token):
 
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request,'accounts/dashboard.html')
+    orders = Order.objects.order_by('-created_at').filter(user=request.user.id,is_ordered = True)
+    orders_count = orders.count()
+    context = {
+        'orders_count':orders_count
+    }
+    return render(request,'accounts/dashboard.html',context)
 
 def forgotpassword(request):
 
@@ -231,5 +237,12 @@ def resetpassword(request):
             return redirect('resetpassword')
     else:
         return render(request,'accounts/resetpassword.html')
+    
+def myorders(request):
+    orders = Order.objects.filter(user=request.user.id,is_ordered =True).order_by('-created_at') #'-' will give order in descending order
+    context = {
+        'orders':orders
+    }
+    return render(request,'accounts/my_orders.html',context)
 
 
