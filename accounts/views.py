@@ -1,6 +1,6 @@
-from django.shortcuts import render,redirect
-from .forms import RegistrationForm
-from .models import Account
+from django.shortcuts import render,redirect,get_object_or_404
+from .forms import RegistrationForm,UserForm,UserProfileForm
+from .models import Account,UserProfile
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -14,7 +14,7 @@ from django.core.mail import EmailMessage
 from cart.models import Cart,CartItem
 from cart.views import _cart_id
 import requests
-from orders.models import Order
+from orders.models import Order,OrderProduct
 
 
 # Create your views here.
@@ -34,6 +34,13 @@ def register(request):
             user.phone_number = phone_number
             user.save()# here basically we r retreiving data from the request.POST form
                        # then next we check if its a valid form..if its valid then we access form data and create user(we have created create_user in models.py) see code
+            
+            #creating user profile
+            profile = UserProfile()
+            profile.user_id = user.id #connecting user to userprofile
+            profile.profile_picture = 'default/default-user.png'
+            profile.save()
+
             #USER_ACTIVATION
             current_site = get_current_site(request) #getting current site
             mail_subject = "please activate your account"
@@ -170,8 +177,10 @@ def activate(request,uidb64,token):
 def dashboard(request):
     orders = Order.objects.order_by('-created_at').filter(user=request.user.id,is_ordered = True)
     orders_count = orders.count()
+    userprofile = UserProfile.objects.get(user_id=request.user.id)
     context = {
-        'orders_count':orders_count
+        'orders_count':orders_count,
+        'userprofile':userprofile
     }
     return render(request,'accounts/dashboard.html',context)
 
@@ -238,11 +247,87 @@ def resetpassword(request):
     else:
         return render(request,'accounts/resetpassword.html')
     
+@login_required(login_url='login')
 def myorders(request):
     orders = Order.objects.filter(user=request.user.id,is_ordered =True).order_by('-created_at') #'-' will give order in descending order
     context = {
         'orders':orders
     }
     return render(request,'accounts/my_orders.html',context)
+
+@login_required(login_url='login')
+def editprofile(request):
+    userprofile = get_object_or_404(UserProfile,user=request.user)
+
+     
+    if request.method == 'POST':
+        user_form = UserForm(request.POST,instance=request.user)
+        profile_form = UserProfileForm(request.POST,request.FILES,instance=userprofile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request,'your profile has been updated.')
+            return redirect('editprofile')
+    else:
+        user_form = UserForm(instance = request.user)
+        profile_form = UserProfileForm(instance=userprofile)
+    
+    context =  {
+        'user_form': user_form,
+        'profile_form':profile_form,
+        'userprofile':userprofile
+    }
+
+
+    return render(request,'accounts/edit_profile.html',context)
+
+@login_required(login_url='login')
+def changepassword(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = Account.objects.get(username__iexact=request.user.username)
+
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                #auth.logout(request) ..after changinf password if we want to logout we can use this.
+                #even if we do not keep..django automatically logouts us
+                messages.success(request,'Password changed successfully.')
+                return redirect('login')
+            else:
+                messages.error(request,'Invalid Current Password')
+                return redirect('changepassword')
+        else:
+            messages.error(request,'Passwords does not match!')
+            return redirect('changepassword')
+
+
+    return render(request,'accounts/changepassword.html')
+
+@login_required(login_url='login')
+def orderdetail(request,order_id):
+    
+
+    #order__order_number = to access order is a foreignkey of orderproduct and order_number is order's attribute
+    #using __ we can access foreign key model 
+    orderdetail = OrderProduct.objects.filter(order__order_number=order_id) 
+    order = Order.objects.get(order_number=order_id)
+
+    subtotal = 0
+    for i in orderdetail:
+        subtotal += i.product.price * i.quantity
+
+    context = {
+        'orderdetail':orderdetail,
+        'order':order,
+        'subtotal':subtotal
+    }
+    return render(request,'accounts/orderdetail.html',context)
 
 
