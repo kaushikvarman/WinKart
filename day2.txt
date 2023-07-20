@@ -1,4 +1,0 @@
-Here for our ecommerce website...we will have many apps such as categories,orders wtc
-First here we will create an app for category..we have to update it in settings
-after that we created category model with all the required fields and added our model in admin.py file.
-Next we have applied this migrations

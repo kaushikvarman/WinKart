@@ -29,7 +29,7 @@ DEBUG = config('DEBUG',default=True,cast=bool) #config return string ..so we cas
 
 ALLOWED_HOSTS = []
 
-DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
 
 
 
@@ -172,5 +172,7 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 
 #for paypal popup
 SECURE_CROSS_ORIGIN_OPENER_POLICY='same-origin-allow-popups'
+
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 

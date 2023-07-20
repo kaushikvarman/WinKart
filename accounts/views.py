@@ -124,7 +124,7 @@ def login(request):
                 query = requests.utils.urlparse(url).query 
                 
                 #query gives : next=/cart/checkout/
-                params = dict(x.split('=') for x in query.split())
+                params = dict(x.split('=') for x in query.split('&'))
                 #params gives : {'next': '/cart/checkout/'}
                 if 'next' in params:
                     nextPage = params['next']
